@@ -15,11 +15,12 @@ import (
 func Start(ctx context.Context, run *options.Run, serve *options.Server) error {
 	cmdCtx, cancelFunc := context.WithCancel(ctx)
 	defer cancelFunc()
-	c := createCommand(cmdCtx, run)
-	must(c.Start())
-	runCtlServer(ctx, c, cmdCtx, run, serve)
+	cmd := createCommand(cmdCtx, run)
+	must(cmd.Start())
+	cmdPtr := &cmd
+	runCtlServer(ctx, cmdPtr, cmdCtx, run, serve)
 	log.Println("lakctl closed")
-	return killGroupForProcess(c)
+	return killGroupForProcess(*cmdPtr)
 }
 
 func createCommand(cmdCtx context.Context, run *options.Run) *exec.Cmd {
