@@ -10,30 +10,32 @@ import (
 )
 
 func runCtlServer(ctx context.Context, cmd *exec.Cmd, cmdCtx context.Context, cancelFunc context.CancelFunc, run *options.Run, serve *options.Server) {
-	http.HandleFunc("/start", handleStart(cmd, cmdCtx, run))
-	http.HandleFunc("/stop", handleStop(cmd))
-	http.HandleFunc("/", handle(cmd, cmdCtx, run))
+	http.HandleFunc("/start", handleStart(&cmd, cmdCtx, run))
+	http.HandleFunc("/stop", handleStop(&cmd))
+	http.HandleFunc("/", handle(&cmd))
 	server := &http.Server{Addr: ":" + serve.PortStr()}
 	startServer(server)
 	waitForServer(ctx, server)
 }
 
-func handleStart(cmd *exec.Cmd, ctx context.Context, run *options.Run) func(http.ResponseWriter, *http.Request) {
+func handleStart(cmd **exec.Cmd, ctx context.Context, run *options.Run) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if cmd.ProcessState != nil {
-			cmd = createCommand(ctx, run)
-			must(cmd.Start())
-			log.Printf("Started command with PID %d\n", cmd.Process.Pid)
+		c := *cmd
+		if c.ProcessState != nil {
+			newCommand := createCommand(ctx, run)
+			must(newCommand.Start())
+			log.Printf("Started command with PID %d\n", newCommand.Process.Pid)
+			*cmd = newCommand
 		} else {
-			log.Printf("Command is already running with PID %d\n", cmd.Process.Pid)
+			log.Printf("Command is already running with PID %d\n", c.Process.Pid)
 		}
 		w.WriteHeader(http.StatusOK)
 	}
 }
 
-func handleStop(cmd *exec.Cmd) func(http.ResponseWriter, *http.Request) {
+func handleStop(cmd **exec.Cmd) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := killGroupForProcess(cmd)
+		err := killGroupForProcess(*cmd)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -57,9 +59,9 @@ func waitForServer(ctx context.Context, server *http.Server) {
 	_ = server.Shutdown(ctx)
 }
 
-func handle(cmd *exec.Cmd, cmdCtx context.Context, run *options.Run) func(http.ResponseWriter, *http.Request) {
+func handle(cmd **exec.Cmd) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = fmt.Fprintf(w, "%d\n", cmd.Process.Pid)
+		_, _ = fmt.Fprintf(w, "%d\n", (*cmd).Process.Pid)
 	}
 }

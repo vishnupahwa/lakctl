@@ -17,9 +17,7 @@ func Start(ctx context.Context, run *options.Run, serve *options.Server) error {
 	c.Start()
 	runCtlServer(ctx, c, cmdCtx, cancelFunc, run, serve)
 	log.Println("lakctl closed")
-	must(killGroupForProcess(c))
-	err := c.Wait()
-	return err
+	return killGroupForProcess(c)
 }
 
 func createCommand(cmdCtx context.Context, run *options.Run) *exec.Cmd {

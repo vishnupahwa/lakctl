@@ -19,13 +19,7 @@ func addStart(topLevel *cobra.Command) {
 	startCmd := &cobra.Command{
 		Use:   "start",
 		Short: "Start an application and an HTTP server to control it",
-		// TODO: Long desc
-		Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+		Long:  `Start an application and an HTTP server for starting, stopping and restarting with different commands`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := SIGContext()
 			err := control.Start(ctx, runOpts, serverOpts)
