@@ -1,0 +1,17 @@
+GET http://localhost:8008/
+# Get PID
+###
+PUT http://localhost:8008/start
+# Start application
+
+###
+###
+PUT http://localhost:8008/stop
+# Stop application
+
+###
+
+GET http://localhost:9999
+
+###
+# Test example app
