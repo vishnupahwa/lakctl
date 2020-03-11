@@ -9,7 +9,8 @@ import (
 	"os/exec"
 )
 
-func runCtlServer(ctx context.Context, cmd *exec.Cmd, cmdCtx context.Context, cancelFunc context.CancelFunc, run *options.Run, serve *options.Server) {
+// runCtlServer starts the HTTP server for controlling the command.
+func runCtlServer(ctx context.Context, cmd *exec.Cmd, cmdCtx context.Context, run *options.Run, serve *options.Server) {
 	http.HandleFunc("/start", handleStart(&cmd, cmdCtx, run))
 	http.HandleFunc("/stop", handleStop(&cmd))
 	http.HandleFunc("/", handle(&cmd))

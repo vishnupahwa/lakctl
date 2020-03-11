@@ -11,11 +11,13 @@ import (
 	"syscall"
 )
 
+// Start the command and the server
 func Start(ctx context.Context, run *options.Run, serve *options.Server) error {
 	cmdCtx, cancelFunc := context.WithCancel(ctx)
+	defer cancelFunc()
 	c := createCommand(cmdCtx, run)
-	c.Start()
-	runCtlServer(ctx, c, cmdCtx, cancelFunc, run, serve)
+	must(c.Start())
+	runCtlServer(ctx, c, cmdCtx, run, serve)
 	log.Println("lakctl closed")
 	return killGroupForProcess(c)
 }
@@ -28,6 +30,8 @@ func createCommand(cmdCtx context.Context, run *options.Run) *exec.Cmd {
 	return c
 }
 
+// killGroupForProcess checks the PID is running and is a child process of lakctl before killing it's group and itself.
+// The cmd process kill and the wait is a safety check to make sure the process tree has fully been terminated.
 func killGroupForProcess(cmd *exec.Cmd) error {
 	pid, err := ps.FindProcess(cmd.Process.Pid)
 	if err != nil {
@@ -44,7 +48,7 @@ func killGroupForProcess(cmd *exec.Cmd) error {
 	}
 	log.Printf("Stopping %s (PID: %d, PPID: %d)", pid.Executable(), pid.Pid(), pid.PPid())
 	errGroup := syscall.Kill(-pid.Pid(), syscall.SIGTERM)
-	errCmd := cmd.Process.Kill()
+	errCmd := cmd.Process.Signal(syscall.SIGTERM)
 	_ = cmd.Wait()
 	return compositeErr(errCmd, errGroup)
 }

@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+// Server struct contains server options for the controlling HTTP server.
 type Server struct {
 	Port int
 }

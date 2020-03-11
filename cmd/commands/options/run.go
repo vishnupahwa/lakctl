@@ -2,6 +2,7 @@ package options
 
 import "github.com/spf13/cobra"
 
+// Run struct contains options regarding the main command to be controlled.
 type Run struct {
 	Command string
 }

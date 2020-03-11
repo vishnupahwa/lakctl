@@ -14,7 +14,7 @@ func main() {
 		Short: "Control applications",
 		Long:  `Testing utility to control applications via HTTP.`,
 	}
-	commands.InitConfig()
+
 	commands.AddCommands(rootCmd)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

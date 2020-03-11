@@ -12,6 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// addStart adds the primary start command to a top level command. This is the entrypoint command for starting
+// a controlled application.
 func addStart(topLevel *cobra.Command) {
 	serverOpts := &options.Server{}
 	runOpts := &options.Run{}
@@ -21,7 +23,7 @@ func addStart(topLevel *cobra.Command) {
 		Short: "Start an application and an HTTP server to control it",
 		Long:  `Start an application and an HTTP server for starting, stopping and restarting with different commands`,
 		Run: func(cmd *cobra.Command, args []string) {
-			ctx := SIGContext()
+			ctx := sigContext()
 			err := control.Start(ctx, runOpts, serverOpts)
 			if err != nil {
 				log.Fatal(err)
@@ -34,7 +36,8 @@ func addStart(topLevel *cobra.Command) {
 	topLevel.AddCommand(startCmd)
 }
 
-func SIGContext() context.Context {
+// sigContext creates a context which will be cancelled on a SIGINT or SIGTERM
+func sigContext() context.Context {
 	signals := make(chan os.Signal)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 	ctx, cancelCtx := context.WithCancel(context.Background())
