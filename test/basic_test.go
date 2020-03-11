@@ -13,7 +13,6 @@ import (
 
 const port = ":8008"
 const commandPort = ":9999"
-const expectedCommandBody = "Hello World!"
 
 var lakctl *exec.Cmd
 
@@ -21,7 +20,7 @@ func init() {
 	_ = os.Chdir("..")
 }
 func setup(t *testing.T) {
-	lakctl = exec.Command("./lakctl", "start", "-r", "go run ./testdata/testapp/main.go")
+	lakctl = exec.Command("./lakctl", "start", "-r", "go run ./testdata/testapp/main.go World")
 	lakctl.Stdout = os.Stdout
 	lakctl.Stderr = os.Stderr
 	lakctl.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
@@ -58,7 +57,7 @@ func TestStoppingThenStartingCommand(t *testing.T) {
 
 	response, _ := http.Get("http://localhost" + commandPort)
 	body := toString(t, response)
-	Equals(t, body, expectedCommandBody)
+	Equals(t, "Hello World", body)
 }
 
 func TestStoppingThenStartingThenStoppingCommand(t *testing.T) {
@@ -74,7 +73,19 @@ func TestStoppingThenStartingThenStoppingCommand(t *testing.T) {
 
 	_, err = http.Get("http://localhost" + commandPort)
 	Assert(t, err != nil, "expected error from get request")
+}
 
+func TestRestart(t *testing.T) {
+	setup(t)
+	t.Cleanup(cleanup)
+	// equivalent to http://localhost:8008/restart/World\n/世界\n
+	_, err := http.Get("http://localhost" + port + "/restart/V29ybGQK/5LiW55WMCg==")
+	Ok(t, err)
+	time.Sleep(1 * time.Second)
+
+	response, _ := http.Get("http://localhost" + commandPort)
+	body := toString(t, response)
+	Equals(t, "Hello 世界", body)
 }
 
 func toString(t *testing.T, response *http.Response) string {

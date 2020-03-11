@@ -1,17 +1,22 @@
 GET http://localhost:8008/
-# Get PID
+# Get the command PID
 ###
 PUT http://localhost:8008/start
-# Start application
+# Start the command with the original 'run' command
 
 ###
 ###
 PUT http://localhost:8008/stop
-# Stop application
+# Stop the command
+
+###
+###
+PUT http://localhost:8008/restart/V29ybGQhCg==/5LiW55WMCg==/
+# Stop the command
 
 ###
 
 GET http://localhost:9999
 
 ###
-# Test example app
+# Test the example app

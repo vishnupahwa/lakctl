@@ -21,7 +21,20 @@ func addStart(topLevel *cobra.Command) {
 	startCmd := &cobra.Command{
 		Use:   "start",
 		Short: "Start an application and an HTTP server to control it",
-		Long:  `Start an application and an HTTP server for starting, stopping and restarting with different commands`,
+		Long: `Start an application and an HTTP server for starting, stopping and restarting with different commands.
+N.B. All HTTP endpoints which start the command use the '--run' command. 
+lakctl does not continuously store modified commands, only the running command's PID.
+When passing a substitution to /restart multiple times, each substitution will replace the original input
+to the --run command.
+e.g (the restart inputs are base64 decoded for clarity)
+$ lakctl start --run "go run main.go hello world"
+$ curl localhost:8008/restart/world/galaxy 
+$ curl localhost:8008/restart/world/universe 
+
+The final command would cause "go run main.go hello universe" to be run, even if the previous command
+was ...hello galaxy.
+
+`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := sigContext()
 			err := control.Start(ctx, runOpts, serverOpts)
