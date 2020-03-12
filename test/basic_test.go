@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
@@ -78,14 +79,30 @@ func TestStoppingThenStartingThenStoppingCommand(t *testing.T) {
 func TestRestart(t *testing.T) {
 	setup(t)
 	t.Cleanup(cleanup)
-	// equivalent to http://localhost:8008/restart/World\n/世界\n
-	_, err := http.Get("http://localhost" + port + "/restart/V29ybGQK/5LiW55WMCg==")
+	replaceJson := strings.NewReader(`{
+		"old": "World",
+		"new": "世界"
+	}`)
+	_, err := http.Post("http://localhost"+port+"/restart/", "application/json", replaceJson)
 	Ok(t, err)
 	time.Sleep(1 * time.Second)
 
 	response, _ := http.Get("http://localhost" + commandPort)
 	body := toString(t, response)
 	Equals(t, "Hello 世界", body)
+}
+
+func TestRestartWithNoSubstitution(t *testing.T) {
+	setup(t)
+	t.Cleanup(cleanup)
+	replaceJson := strings.NewReader(`{}`)
+	_, err := http.Post("http://localhost"+port+"/restart/", "application/json", replaceJson)
+	Ok(t, err)
+	time.Sleep(1 * time.Second)
+
+	response, _ := http.Get("http://localhost" + commandPort)
+	body := toString(t, response)
+	Equals(t, "Hello World", body)
 }
 
 func toString(t *testing.T, response *http.Response) string {

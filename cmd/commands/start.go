@@ -32,8 +32,8 @@ $ curl http://localhost:8008/stop
 Starting the application:
 $ curl http://localhost:8008/start
 
-Restarting the application substituting the --run flag: (/restart/<old base64 encoded value>/<new base64 encoded value>)
-$ curl http://localhost:8008/restart/V29ybGQK/5LiW55WMCg==
+Restarting the application substituting the --run flag:
+$ curl -X POST --data '{"old":"World", "new":"世界"}' localhost:8008/restart
 
 N.B. The start and restart endpoints will always try and start or substitute the command given in the '--run' flag.
 `,

@@ -11,8 +11,13 @@ PUT http://localhost:8008/stop
 
 ###
 ###
-PUT http://localhost:8008/restart/V29ybGQhCg==/5LiW55WMCg==/
-# Stop the command
+POST http://localhost:8008/restart/
+Content-Type: application/json
+
+{
+  "old" : "video-ft.yml",
+  "new" : "/tmp/config.yml"
+}
 
 ###
 
