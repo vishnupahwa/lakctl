@@ -10,9 +10,10 @@ import (
 func main() {
 	// rootCmd represents the base command when called without any subcommands
 	var rootCmd = &cobra.Command{
-		Use:   "lakctl",
-		Short: "Control applications",
-		Long:  `Testing utility to control applications via HTTP.`,
+		Use:     "lakctl",
+		Short:   "Control applications",
+		Long:    `Testing utility to control applications via HTTP.`,
+		Version: "alpha",
 	}
 
 	commands.AddCommands(rootCmd)
