@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"syscall"
+	"time"
 )
 
 // Start the command and the server
@@ -50,8 +51,19 @@ func killGroupForProcess(cmd *exec.Cmd) error {
 	log.Printf("Stopping %s (PID: %d, PPID: %d)", pid.Executable(), pid.Pid(), pid.PPid())
 	errGroup := syscall.Kill(-pid.Pid(), syscall.SIGTERM)
 	errCmd := cmd.Process.Signal(syscall.SIGTERM)
-	_ = cmd.Wait()
+	waitWithTimeout(cmd)
 	return compositeErr(errCmd, errGroup)
+}
+
+func waitWithTimeout(cmd *exec.Cmd) {
+	wait := make(chan error, 1)
+	go func() { wait <- cmd.Wait() }()
+	select {
+	case <-wait:
+		return
+	case <-time.After(30 * time.Second):
+		log.Printf("Timed out waiting 30s for process to be killed\n")
+	}
 }
 
 func compositeErr(errs ...error) error {

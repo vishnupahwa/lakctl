@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// addStart adds the primary start command to a top level command. This is the entrypoint command for starting
-// a controlled application.
+// addStart adds the primary start command to a top level command.
+//This is the entrypoint command for starting a controlled application.
 func addStart(topLevel *cobra.Command) {
 	serverOpts := &options.Server{}
 	runOpts := &options.Run{}

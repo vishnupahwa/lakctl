@@ -73,8 +73,7 @@ func handleRestart(cmd **exec.Cmd, ctx context.Context, run *options.Run) func(h
 
 		err = killGroupForProcess(*cmd)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			log.Printf("Failed to kill process %v (continuing)\n", err)
 		}
 
 		log.Printf(`Replacing %s with %s in command: "%s"`, oldStr, newStr, run.Command)
@@ -83,10 +82,9 @@ func handleRestart(cmd **exec.Cmd, ctx context.Context, run *options.Run) func(h
 		}
 		newCommand := createCommand(ctx, &subRun)
 		must(newCommand.Start())
-		log.Printf("Started command with PID %d\n", newCommand.Process.Pid)
+		log.Printf("Started substituted command with PID %d\n", newCommand.Process.Pid)
 		*cmd = newCommand
 		w.WriteHeader(http.StatusOK)
-
 	}
 }
 
